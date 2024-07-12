@@ -1,15 +1,24 @@
-import puppeteer from "puppeteer";
+import puppeteer from 'puppeteer';
 
 export const fetchPageData = async (url) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+  });
   const page = await browser.newPage();
-  await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+  await page.setUserAgent(
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+  );
 
   // Disable loading unnecessary resources
   await page.setRequestInterception(true);
   page.on('request', (request) => {
     const resourceType = request.resourceType();
-    if (resourceType === 'image' || resourceType === 'stylesheet' || resourceType === 'font') {
+    if (
+      resourceType === 'image' ||
+      resourceType === 'stylesheet' ||
+      resourceType === 'font'
+    ) {
       request.abort();
     } else {
       request.continue();
@@ -27,7 +36,10 @@ export const fetchPageData = async (url) => {
         const delay = 100;
         const timer = setInterval(() => {
           document.scrollingElement.scrollBy(0, distance);
-          if (document.scrollingElement.scrollTop + window.innerHeight >= document.scrollingElement.scrollHeight) {
+          if (
+            document.scrollingElement.scrollTop + window.innerHeight >=
+            document.scrollingElement.scrollHeight
+          ) {
             clearInterval(timer);
             resolve();
           }
@@ -37,18 +49,29 @@ export const fetchPageData = async (url) => {
     };
 
     const extractData = () => {
-      document.querySelectorAll(".a37d52f0").forEach((element) => {
-        let imgElement = element.firstChild.children[1]?.firstChild?.firstChild?.querySelector('img');
+      document.querySelectorAll('.a37d52f0').forEach((element) => {
+        let imgElement =
+          element.firstChild.children[1]?.firstChild?.firstChild?.querySelector(
+            'img'
+          );
         let imgURL = imgElement ? imgElement.src : null;
 
         if (!imgURL) {
-          imgElement = element.firstChild.children[1]?.firstChild?.firstChild?.querySelector('source');
-          imgURL = imgElement ? imgElement.srcset.split(",")[0].split(" ")[0] : null;
+          imgElement =
+            element.firstChild.children[1]?.firstChild?.firstChild?.querySelector(
+              'source'
+            );
+          imgURL = imgElement
+            ? imgElement.srcset.split(',')[0].split(' ')[0]
+            : null;
         }
 
-        const location = element.firstChild.lastChild?.children[2]?.children[2]?.textContent.trim();
-        const title = element.firstChild.lastChild?.children[2]?.children[1]?.textContent.trim();
-        const price = element.firstChild.lastChild.children[1]?.textContent.trim();
+        const location =
+          element.firstChild.lastChild?.children[2]?.children[2]?.textContent.trim();
+        const title =
+          element.firstChild.lastChild?.children[2]?.children[1]?.textContent.trim();
+        const price =
+          element.firstChild.lastChild.children[1]?.textContent.trim();
         const anchorElement = element.querySelector('a');
         const propertyURL = anchorElement ? anchorElement.href : null;
 
@@ -65,13 +88,15 @@ export const fetchPageData = async (url) => {
     await waitForImages();
     extractData();
 
-    let nextBtn = document.querySelector('[role="navigation"]').children[0].lastChild.children[0];
-    while (nextBtn?.getAttribute("title") === "Next") {
+    let nextBtn = document.querySelector('[role="navigation"]').children[0]
+      .lastChild.children[0];
+    while (nextBtn?.getAttribute('title') === 'Next') {
       nextBtn.click();
       await waitForImages();
       await waitForImages();
       extractData();
-      nextBtn = document.querySelector('[role="navigation"]').children[0].lastChild.children[0];
+      nextBtn = document.querySelector('[role="navigation"]').children[0]
+        .lastChild.children[0];
     }
 
     return data;
@@ -102,20 +127,26 @@ export const fetchPageData = async (url) => {
   const permitNumberPromises = data.map(async (property) => {
     if (property.propertyURL) {
       let permitNumber = null;
-      for (let attempt = 0; attempt < 3; attempt++) { // Retry up to 3 times
+      for (let attempt = 0; attempt < 3; attempt++) {
+        // Retry up to 3 times
         try {
           permitNumber = await getPermitNumber(property.propertyURL);
           if (permitNumber) break;
         } catch (error) {
-          console.error(`Error fetching permit number for ${property.propertyURL}, attempt ${attempt + 1}:`, error);
+          console.error(
+            `Error fetching permit number for ${
+              property.propertyURL
+            }, attempt ${attempt + 1}:`,
+            error
+          );
         }
       }
       return {
-          imageURL: property.imageURL,
-          location: property.location,
-          title: property.title,
-          price: property.price,
-          permit_number: permitNumber,
+        imageURL: property.imageURL,
+        location: property.location,
+        title: property.title,
+        price: property.price,
+        permit_number: permitNumber,
       };
     }
   });
