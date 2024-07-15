@@ -20,7 +20,9 @@ export const scrapePageData = async (url) => {
           '#card-list > div > .styles_desktop_container__V85pq > li'
         )
         .forEach((element) => {
-          const imgElement = element.querySelector('img[data-src], img[src]');
+          const imgElement = element.querySelector('.styles_desktop_gallery-image__n81d5');
+
+
           const priceElement = element.querySelector(
             '.styles-module_content__price-area__I0781 > p'
           );
@@ -83,7 +85,7 @@ export const scrapePageData = async (url) => {
         price: item.price,
         title: item.title,
         location: item.location,
-        permit_number: dld_permit_number,
+        permit_Number: dld_permit_number,
       });
     } else {
       finalData.push({
@@ -91,7 +93,7 @@ export const scrapePageData = async (url) => {
         price: item.price,
         title: item.title,
         location: item.location,
-        permit_number: '',
+        permit_Number: '',
       });
     }
   }

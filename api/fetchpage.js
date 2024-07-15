@@ -91,8 +91,9 @@ while (i < n) {
     const price = document.querySelector("._2d107f6e")?.textContent || null;
     const title = document.querySelector("._34032b68.dc0dc50b._701d0fe0 h1")?.textContent || null;
     const location = document.querySelector(".e4fd45f0")?.textContent || null;
+    const permitNumber = document.querySelector("._1deff3aa ._2fdf7fc5")?.textContent || null;
 
-    return { image, price, title, location };
+    return { image, price, title, location, permitNumber };
   })));
 
   // Add the results to data array
